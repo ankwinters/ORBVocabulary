@@ -16,25 +16,28 @@ typedef DBoW2::TemplatedVocabulary<DBoW2::FORB::TDescriptor, DBoW2::FORB>
 //--------------------------------------------------------------------------
 void loadFeatures(const string &path, vector<vector<FORB::TDescriptor> > &features);
 void changeStructure(const Mat &plain, vector<FORB::TDescriptor> &out);
-void VocCreation(const vector<vector<FORB::TDescriptor> > &features);
+void VocCreation(const vector<vector<FORB::TDescriptor> > &features,const string &out_file);
 
 //--------------------------------------------------------------------------
 int main(int argc, char** argv) {
+    if(argc!=3) {
+        cout<<"Usage:vocgen <path-to-image-dir> [vocabulary-out-file]"<<endl;
+        return -1;
+    }
     vector<vector<FORB::TDescriptor> > features;
-    loadFeatures("/tmp/pic", features);
-    VocCreation(features);
+    loadFeatures(argv[1], features);
+    VocCreation(features,argv[2]);
 
     return 0;
 }
 
 void loadFeatures(const string &path, vector<vector<FORB::TDescriptor> > &features) {
     features.clear();
-    //features.reserve(NIMAGES);
+
     vector<string> img_list;
     file_io::ImageIo img_io(false);
     img_io.read_file_list(path, img_list);
 
-    //cv::Ptr<cv::xfeatures2d::SURF> surf = cv::xfeatures2d::SURF::create(400, 4, 2, EXTENDED_SURF);
     ORB orb_detector(1000);
 
     cout << "Extracting ORB features..." << endl;
@@ -53,17 +56,12 @@ void loadFeatures(const string &path, vector<vector<FORB::TDescriptor> > &featur
 
     }
 
-    //for(auto item:features[0])
-    //    cout<<item<<endl;
-
 }
 
 
 void changeStructure(const Mat &plain, vector<FORB::TDescriptor> &out)
 {
     out.clear();
-    //out.resize(plain.rows);
-
     for(unsigned int i = 0; i < plain.rows; i++)
     {
         //FORB::TDescriptor i_row;
@@ -74,7 +72,7 @@ void changeStructure(const Mat &plain, vector<FORB::TDescriptor> &out)
     }
 }
 
-void VocCreation(const vector<vector<FORB::TDescriptor> > &features) {
+void VocCreation(const vector<vector<FORB::TDescriptor> > &features, const string &out_file) {
     // branching factor and depth levels
     const int k = 10;
     const int L = 6;
@@ -95,7 +93,7 @@ void VocCreation(const vector<vector<FORB::TDescriptor> > &features) {
 
     // save the vocabulary to disk
     cout << endl << "Saving vocabulary..." << endl;
-    voc.saveToTextFile("voc.txt");
+    voc.saveToTextFile(out_file);
     cout << "Done" << endl;
 
 
